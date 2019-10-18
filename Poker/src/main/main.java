@@ -11,17 +11,52 @@ public class main {
 
 	public static void main(String[] args) {
 
+//		Card card1 = new Card("test", 2);
+//		Card card2 = new Card("test", 2);
+//		Card card3 = new Card("test", 3);
+//		Card card4 = new Card("test", 3);
+//		Card card5 = new Card("test", 2);
+
+//		int count = 0;
+//		boolean aux = true;
+//		while (aux) {
+//			deck = newDeck();
+//			hand = newHand(deck);
+//			table = newTable(deck);
+			
+//			table.add(card1);
+//			table.add(card2);
+//			table.add(card3);
+//			table.add(card4);
+//			table.add(card5);
+			
+//			printDeck(hand);
+//			printDeck(table);
+//			System.out.println("Equal Cards on Table");
+//			printDeck(equalCardsOnTable());
+//			System.out.println("Single pair: " + checkPair());
+//			System.out.println("Double pairs: " + checkDoublePair());
+//			if (equalCardsOnTable().size() >= 5) {
+//				aux = false;
+//			} else {
+//				deck = new ArrayList<Card>();
+//				hand = new ArrayList<Card>();
+//				table = new ArrayList<Card>();
+//			}
+//			count++;
+//		}
+//		System.out.println("Count: " + count);
+		
 		deck = newDeck();
-//		printDeck(deck);
 		hand = newHand(deck);
 		table = newTable(deck);
-//		printDeck(deck);
 		printDeck(hand);
 		printDeck(table);
+		System.out.println("Equal Cards on Table");
+		printDeck(equalCardsOnTable());
 		System.out.println("Single pair: "+ checkPair());
 		System.out.println("Double pairs: "+ checkDoublePair());
 	}
-	
 
 	public static void line() {
 		String line = "-";
@@ -33,8 +68,7 @@ public class main {
 
 	public static void printDeck(ArrayList<Card> cards) {
 		for (int i = 0; i < cards.size(); i++) {
-			System.out.println(
-					(cards.get(i).getValue()) + " " + cards.get(i).getSuit() + " " + cards.get(i).isUsed());
+			System.out.println((cards.get(i).getValue()) + " " + cards.get(i).getSuit() + " " + cards.get(i).isUsed());
 		}
 		line();
 	}
@@ -50,16 +84,13 @@ public class main {
 				suit = "Diamonds";
 			}
 			for (int j = 0; j < 13; j++) {
-				deck.add(new Card(suit, j+1));
+				deck.add(new Card(suit, j + 1));
 			}
 		}
 		return deck;
 	}
 
 	public static ArrayList<Card> newHand(ArrayList<Card> deck) {
-
-//		numberOfHands += numberOfHands;
-
 		Random random = new Random();
 		while (true) {
 			int i = random.nextInt(52);
@@ -91,7 +122,8 @@ public class main {
 
 	public static boolean checkPair() {
 
-		// Returns true if the player have a pair on hand or one card on hand and the other on the table that have the same value.
+		// Returns true if the player have a pair on hand or one card on hand and the
+		// other on the table that have the same value.
 		// It only check for ONE pair.
 		if (hand.get(0).getValue() == hand.get(1).getValue()) {
 			return true;
@@ -111,9 +143,9 @@ public class main {
 		if (hand.get(0).getValue() == hand.get(1).getValue()) {
 			return false;
 		}
-		
+
 		int pairNo = 0;
-		
+
 		for (int i = 0; i < 2; i++) {
 			for (int j = 0; j < table.size(); j++) {
 				if (hand.get(i).getValue() == table.get(j).getValue()) {
@@ -125,43 +157,72 @@ public class main {
 		return pairNo == 2 ? true : false;
 
 	}
-	
+
+	// Return an array of cards that have the same value (up to 2 different values).
+	// It has to have more then one card of the same value to enter the array.
+	public static ArrayList<Card> equalCardsOnTable() {
+		ArrayList<Card> equalCardsOnTable = new ArrayList<Card>();
+		int aux = 0;
+		boolean referenceCounted = true;
+
+		for (int i = 0; i < table.size(); i++) {
+			if (equalCardsOnTable.size() == 0 || (table.get(i).getValue() != aux && table.get(i).getValue() != equalCardsOnTable.get(0).getValue()) ) {
+				referenceCounted = true;
+				for (int j = 0; j < table.size(); j++) {
+					if (i != j) {
+						if (table.get(i).getValue() == table.get(j).getValue()) {
+							if (referenceCounted) {
+								aux = table.get(i).getValue();
+								equalCardsOnTable.add(table.get(i));
+								referenceCounted = false;
+							}
+							equalCardsOnTable.add(table.get(j));
+						}
+					}
+				}
+			}
+		}
+		return equalCardsOnTable;
+	}
+
 	public static boolean checkThreeOfAKind() {
 		ArrayList<Card> equalCardsOnTable = new ArrayList<Card>();
-		
-		//Check if table have 3 cards of the same value.
+
+		// Check if table have 3 cards of the same value.
 		for (int i = 0; i < table.size(); i++) {
 			for (int j = 0; j < table.size(); j++) {
-				if(i != j) {
-					if(table.get(i).getValue() == table.get(j).getValue()) {
-						equalCardsOnTable.add(table.get(i));							
+				if (i != j) {
+					if (table.get(i).getValue() == table.get(j).getValue()) {
+						equalCardsOnTable.add(table.get(i));
 						equalCardsOnTable.add(table.get(j));
-						if(equalCardsOnTable.size() == 3) {
+						if (equalCardsOnTable.size() == 3) {
 							return false;
 						}
 					}
 				}
 			}
 		}
-		
-		//If player have same value cards on hands AND one more card of the same value on the table.
+
+		// If player have same value cards on hands AND one more card of the same value
+		// on the table.
 		if (hand.get(0).getValue() == hand.get(1).getValue() && equalCardsOnTable.size() == 0) {
 			for (int i = 0; i < table.size(); i++) {
-				if(table.get(i).getValue() == hand.get(0).getValue()) {
+				if (table.get(i).getValue() == hand.get(0).getValue()) {
 					return true;
 				}
 			}
-		}else if(hand.get(0).getValue() != hand.get(1).getValue()) {
+		} else if (hand.get(0).getValue() != hand.get(1).getValue()) {
 			for (int i = 0; i < table.size(); i++) {
 				for (int j = 0; j < hand.size(); j++) {
-					if(hand.get(j).getValue() == table.get(i).getValue() && hand.get(j).getValue() == equalCardsOnTable.get(0).getValue()) {
+					if (hand.get(j).getValue() == table.get(i).getValue()
+							&& hand.get(j).getValue() == equalCardsOnTable.get(0).getValue()) {
 						return true;
 					}
 				}
 			}
 		}
 		return false;
-		
+
 	}
 
 }
