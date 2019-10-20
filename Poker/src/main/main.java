@@ -11,11 +11,14 @@ public class main {
 
 	public static void main(String[] args) {
 
-		Card card1 = new Card("test", 2);
-		Card card2 = new Card("test", 2);
-		Card card3 = new Card("test", 3);
-		Card card4 = new Card("test", 3);
-		Card card5 = new Card("test", 2);
+		Card table1 = new Card("test", 1);
+		Card table2 = new Card("test", 2);
+		Card table3 = new Card("test", 3);
+		Card table4 = new Card("test", 4);
+		Card table5 = new Card("test", 5);
+
+		Card hand1 = new Card("test", 4);
+		Card hand2 = new Card("test", 10);
 
 		int count = 0;
 		boolean aux = true;
@@ -24,11 +27,14 @@ public class main {
 			hand = newHand(deck);
 			table = newTable(deck);
 
-//			table.add(card1);
-//			table.add(card2);
-//			table.add(card3);
-//			table.add(card4);
-//			table.add(card5);
+//			table.add(table1);
+//			table.add(table2);
+//			table.add(table3);
+//			table.add(table4);
+//			table.add(table5);
+//			
+//			hand.add(hand1);
+//			hand.add(hand2);
 
 			printDeck(hand);
 			printDeck(table);
@@ -37,8 +43,12 @@ public class main {
 			System.out.println("Single pair: " + checkPair());
 			System.out.println("Double pairs: " + checkDoublePair());
 			System.out.println("Three of a Kind: " + checkThreeOfAKind());
+			System.out.println("Full House: " + checkFullHouse());
+			System.out.println("Four of a Kind: " + checkFourOfAKind());
+			System.out.println("Flush: " + checkFlush());
+			System.out.println("Straight: " + checkStraight());
 			line();
-			if (checkThreeOfAKind() && equalCardsOnTable().size() == 5) {
+			if (checkStraight()) {
 				aux = false;
 			} else {
 				deck = new ArrayList<Card>();
@@ -122,12 +132,19 @@ public class main {
 		return table;
 	}
 
+	public static boolean checkPairOnHand() {
+		if (hand.get(0).getValue() == hand.get(1).getValue()) {
+			return true;
+		}
+		return false;
+	}
+
 	public static boolean checkPair() {
 
 		// Returns true if the player have a pair on hand or one card on hand and the
 		// other on the table that have the same value.
 		// It only check for ONE pair.
-		if (hand.get(0).getValue() == hand.get(1).getValue()) {
+		if (checkPairOnHand()) {
 			return true;
 		}
 		for (int i = 0; i < 2; i++) {
@@ -142,7 +159,7 @@ public class main {
 
 	public static boolean checkDoublePair() {
 
-		if (hand.get(0).getValue() == hand.get(1).getValue()) {
+		if (checkPairOnHand()) {
 			return false;
 		}
 
@@ -172,15 +189,13 @@ public class main {
 					&& table.get(i).getValue() != equalCardsOnTable.get(0).getValue())) {
 				referenceCounted = true;
 				for (int j = 0; j < table.size(); j++) {
-					if (i != j) {
-						if (table.get(i).getValue() == table.get(j).getValue()) {
-							if (referenceCounted) {
-								aux = table.get(i).getValue();
-								equalCardsOnTable.add(table.get(i));
-								referenceCounted = false;
-							}
-							equalCardsOnTable.add(table.get(j));
+					if (i != j && table.get(i).getValue() == table.get(j).getValue()) {
+						if (referenceCounted) {
+							aux = table.get(i).getValue();
+							equalCardsOnTable.add(table.get(i));
+							referenceCounted = false;
 						}
+						equalCardsOnTable.add(table.get(j));
 					}
 				}
 			}
@@ -188,17 +203,50 @@ public class main {
 		return equalCardsOnTable;
 	}
 
+	public static ArrayList<Card> firstSameValue() {
+		ArrayList<Card> equalCardsOnTable = equalCardsOnTable();
+		ArrayList<Card> firstSameValue = new ArrayList<>();
+
+		if (equalCardsOnTable.size() >= 2) {
+			for (int i = 0; i < equalCardsOnTable.size(); i++) {
+				if (equalCardsOnTable.get(i).getValue() == equalCardsOnTable.get(0).getValue()) {
+					firstSameValue.add(equalCardsOnTable.get(i));
+				}
+			}
+		} else {
+			firstSameValue.add(new Card("", -1));
+		}
+		return firstSameValue;
+	}
+
+	public static ArrayList<Card> secondSameValue() {
+		ArrayList<Card> equalCardsOnTable = equalCardsOnTable();
+		ArrayList<Card> secondSameValue = new ArrayList<>();
+
+		if (equalCardsOnTable.size() >= 4 && equalCardsOnTable.get(0).getValue() != equalCardsOnTable
+				.get(equalCardsOnTable.size() - 1).getValue()) {
+			for (int i = 0; i < equalCardsOnTable.size(); i++) {
+				if (equalCardsOnTable.get(i).getValue() != equalCardsOnTable.get(0).getValue()) {
+					secondSameValue.add(equalCardsOnTable.get(i));
+				}
+			}
+		} else {
+			secondSameValue.add(new Card("", -1));
+		}
+		return secondSameValue;
+	}
+
 	public static boolean checkThreeOfAKind() {
 		ArrayList<Card> equalCardsOnTable = equalCardsOnTable();
 		ArrayList<Card> sameValue = new ArrayList<>();
 		ArrayList<Card> sameValue2 = new ArrayList<>();
 
-		if (hand.get(0).getValue() == hand.get(1).getValue()) {
+		if (checkPairOnHand()) {
 			if (equalCardsOnTable.size() > 0) {
 				for (int i = 0; i < table.size(); i++) {
 					for (int j = 0; j < equalCardsOnTable.size(); j++) {
 						if (table.get(i).getValue() == hand.get(0).getValue()
-								&& hand.get(0).getValue() != equalCardsOnTable.get(j).getValue()) {
+								&& hand.get(0).getValue() == equalCardsOnTable.get(j).getValue()) {
 							return true;
 						}
 					}
@@ -211,21 +259,23 @@ public class main {
 				}
 			}
 		} else {
-			if(equalCardsOnTable.size() >= 2) {
-				if(equalCardsOnTable.get(0).getValue() != equalCardsOnTable.get(equalCardsOnTable.size()-1).getValue()) {
+			if (equalCardsOnTable.size() >= 2) {
+				if (equalCardsOnTable.get(0).getValue() != equalCardsOnTable.get(equalCardsOnTable.size() - 1)
+						.getValue()) {
 					for (int i = 0; i < equalCardsOnTable.size(); i++) {
-						if(equalCardsOnTable.get(i).getValue() == equalCardsOnTable.get(0).getValue()) {
+						if (equalCardsOnTable.get(i).getValue() == equalCardsOnTable.get(0).getValue()) {
 							sameValue.add(equalCardsOnTable.get(i));
-						}else {
+						} else {
 							sameValue2.add(equalCardsOnTable.get(i));
 						}
 					}
 				}
 				for (int i = 0; i < hand.size(); i++) {
-					if(sameValue.size() == 2 && hand.get(i).getValue() == sameValue.get(0).getValue()) {
+					if (firstSameValue().size() >= 2 && hand.get(i).getValue() == firstSameValue().get(0).getValue()) {
 						return true;
 					}
-					if(sameValue2.size() == 2 && hand.get(i).getValue() == sameValue2.get(0).getValue()) {
+					if (secondSameValue().size() >= 2
+							&& hand.get(i).getValue() == secondSameValue().get(0).getValue()) {
 						return true;
 					}
 				}
@@ -233,11 +283,137 @@ public class main {
 		}
 		return false;
 	}
-	
-	public static boolean checkFullHose() {
-		if(checkThreeOfAKind() && hand.get(0).getValue() != hand.get(1).getValue()) {
-			
+
+	public static boolean checkFullHouse() {
+		if (checkDoublePair()) {
+			boolean hand1 = false;
+			boolean hand2 = false;
+
+			for (int j = 0; j < table.size(); j++) {
+				if (hand.get(0).getValue() == table.get(j).getValue()) {
+					hand1 = true;
+				}
+			}
+			for (int j = 0; j < table.size(); j++) {
+				if (hand.get(1).getValue() == table.get(j).getValue()) {
+					hand2 = true;
+				}
+			}
+
+			if ((hand.get(0).getValue() == firstSameValue().get(0).getValue() && hand1)
+					|| hand.get(1).getValue() == firstSameValue().get(0).getValue() && hand2) {
+				return true;
+			}
 		}
+		return false;
+	}
+
+	public static boolean checkFourOfAKind() {
+		ArrayList<Card> equalCardsOnTable = equalCardsOnTable();
+		int count = 0;
+
+		if (checkPairOnHand()) {
+			for (int i = 0; i < equalCardsOnTable.size(); i++) {
+				if (hand.get(0).getValue() == equalCardsOnTable.get(i).getValue()) {
+					count++;
+					if (count == 2) {
+						return true;
+					}
+				}
+			}
+		} else {
+			for (int j = 0; j < hand.size(); j++) {
+				for (int i = 0; i < equalCardsOnTable.size(); i++) {
+					if (hand.get(j).getValue() == equalCardsOnTable.get(i).getValue()) {
+						count++;
+						if (count == 3) {
+							return true;
+						}
+					}
+				}
+			}
+		}
+
+		return false;
+	}
+
+	public static boolean checkFlush() {
+
+		ArrayList<Card> suitCount = new ArrayList<Card>();
+
+		if (hand.get(0).getSuit().equals(hand.get(1).getSuit())) {
+			suitCount.add(hand.get(0));
+			suitCount.add(hand.get(1));
+			for (Card table : table) {
+				if (table.getSuit().equals(hand.get(0).getSuit())) {
+					suitCount.add(table);
+					if (suitCount.size() == 5) {
+						return true;
+					}
+				}
+			}
+		} else {
+			boolean firstTime = true;
+			boolean countHand = true;
+			for (Card hand : hand) {
+				if (!firstTime) {
+					suitCount.removeAll(suitCount);
+				}
+				for (Card table : table) {
+					if (hand.getSuit().contentEquals(table.getSuit())) {
+						if (countHand) {
+							suitCount.add(hand);
+							countHand = false;
+						}
+						suitCount.add(table);
+						if (suitCount.size() == 5) {
+							return true;
+						}
+					}
+				}
+				if (firstTime) {
+					firstTime = false;
+				}
+			}
+		}
+		return false;
+	}
+
+	public static boolean checkStraight() {
+
+		ArrayList<Card> straightCount = new ArrayList<Card>();
+		ArrayList<Card> handPlustable = new ArrayList<Card>();
+		handPlustable.addAll(hand);
+		handPlustable.addAll(table);
+
+		boolean straight = false;
+		boolean checkHandCardUse = false;
+		int aux = hand.get(0).getValue();
+//		--
+
+		for (Card card : handPlustable) {
+			if (card.getValue() < aux) {
+				aux = card.getValue();
+			}
+		}
+
+		while (!straight) {
+			straight = true;
+			for (Card card : handPlustable) {
+				if (card.getValue() == aux + 1) {
+					if(card.equals(hand.get(0)) || card.equals(hand.get(1))){
+						checkHandCardUse = true;
+					}
+					aux++;
+					straightCount.add(card);
+					straight = false;
+					if (straightCount.size() == 5 && checkHandCardUse) {
+						return true;
+					}
+				}
+			}
+		}
+
 		return false;
 	}
 
