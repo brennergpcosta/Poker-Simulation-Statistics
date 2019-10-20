@@ -47,8 +47,9 @@ public class main {
 			System.out.println("Four of a Kind: " + checkFourOfAKind());
 			System.out.println("Flush: " + checkFlush());
 			System.out.println("Straight: " + checkStraight());
+			System.out.println("Royal Stright: " + checkRoyalStraight());
 			line();
-			if (checkStraight()) {
+			if (checkRoyalStraight()) {
 				aux = false;
 			} else {
 				deck = new ArrayList<Card>();
@@ -400,8 +401,8 @@ public class main {
 		while (!straight) {
 			straight = true;
 			for (Card card : handPlustable) {
-				if (card.getValue() == aux + 1) {
-					if(card.equals(hand.get(0)) || card.equals(hand.get(1))){
+				if (card.getValue() == aux + 1 || (card.getValue() == 1 && aux + 1 == 15)) {
+					if (card.equals(hand.get(0)) || card.equals(hand.get(1))) {
 						checkHandCardUse = true;
 					}
 					aux++;
@@ -412,6 +413,60 @@ public class main {
 					}
 				}
 			}
+		}
+
+		return false;
+	}
+
+	public static boolean checkRoyalStraight() {
+		ArrayList<Card> straightCount = new ArrayList<Card>();
+		ArrayList<Card> handPlustable = new ArrayList<Card>();
+		handPlustable.addAll(hand);
+		handPlustable.addAll(table);
+
+		boolean straight = false;
+		boolean checkHandCardUse = false;
+		int aux = hand.get(0).getValue();
+//		--
+
+		for (Card card : handPlustable) {
+			if (card.getValue() < aux) {
+				aux = card.getValue();
+			}
+		}
+
+		int count = 0;
+		
+		while (!straight) {
+			straight = true;
+			for (Card card : handPlustable) {
+				if (card.getValue() == aux + 1 || (card.getValue() == 1 && aux + 1 == 15)) {
+					if (card.equals(hand.get(0)) || card.equals(hand.get(1))) {
+						checkHandCardUse = true;
+					}
+					aux++;
+					straightCount.add(card);
+					if(count < 2) {
+						straight = false;						
+					}
+					if (straightCount.size() == 5 && checkHandCardUse) {
+						return true;
+					}
+				}
+			}
+			count++;
+			int difference = 0;
+			boolean flag = true;
+			for (Card card2 : handPlustable) {
+				if (flag) {
+					difference = card2.getValue() - aux;
+					flag = false;
+				}
+				if (difference > card2.getValue() - aux) {
+					difference = card2.getValue() - aux;
+				}
+			}
+			aux += difference;
 		}
 
 		return false;
