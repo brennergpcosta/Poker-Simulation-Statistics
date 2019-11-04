@@ -1,6 +1,8 @@
 package main;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Random;
 
 public class main {
@@ -11,54 +13,97 @@ public class main {
 
 	public static void main(String[] args) {
 
-		Card table1 = new Card("test", 1);
-		Card table2 = new Card("test", 2);
-		Card table3 = new Card("test", 3);
-		Card table4 = new Card("test", 4);
-		Card table5 = new Card("test", 5);
-
-		Card hand1 = new Card("test", 4);
-		Card hand2 = new Card("test", 10);
+		int pair = 0;
+		int doublePair = 0;
+		int threeOfAKind = 0;
+		int fourOfAKind = 0;
+		int flush = 0;
+		int straight = 0;
+		int straightFlush = 0;
+		
+//		Card hand1 = new Card("test", 5);
+//		Card hand2 = new Card("test", 1);
+//
+//		Card table1 = new Card("test", 4);
+//		Card table2 = new Card("test", 2);
+//		Card table3 = new Card("test", 3);
+//		Card table4 = new Card("test", 9);
+//		Card table5 = new Card("test", 7);
 
 		int count = 0;
 		boolean aux = true;
-		while (aux) {
+		while (count < 1000000) {
+			
 			deck = newDeck();
 			hand = newHand(deck);
 			table = newTable(deck);
-
+			
+			if(checkPair()) {
+				pair++;
+			}
+			if(checkDoublePair()) {
+				doublePair++;
+			}
+			if(checkThreeOfAKind()) {
+				threeOfAKind++;
+			}
+			if(checkFourOfAKind()) {
+				fourOfAKind++;
+			}
+			if(checkFlush()) {
+				flush++;
+			}
+			if(checkStraight()) {
+				straight++;
+			}
+			if(checkStraightFlush()) {
+				straightFlush++;
+			}
+		
 //			table.add(table1);
 //			table.add(table2);
 //			table.add(table3);
 //			table.add(table4);
 //			table.add(table5);
-//			
+//
 //			hand.add(hand1);
 //			hand.add(hand2);
 
-			printDeck(hand);
-			printDeck(table);
-			System.out.println("Equal Cards on Table");
-			printDeck(equalCardsOnTable());
-			System.out.println("Single pair: " + checkPair());
-			System.out.println("Double pairs: " + checkDoublePair());
-			System.out.println("Three of a Kind: " + checkThreeOfAKind());
-			System.out.println("Full House: " + checkFullHouse());
-			System.out.println("Four of a Kind: " + checkFourOfAKind());
-			System.out.println("Flush: " + checkFlush());
-			System.out.println("Straight: " + checkStraight());
-			System.out.println("Royal Stright: " + checkRoyalStraight());
-			line();
-			if (checkRoyalStraight()) {
-				aux = false;
-			} else {
-				deck = new ArrayList<Card>();
-				hand = new ArrayList<Card>();
-				table = new ArrayList<Card>();
-			}
+//			printDeck(hand);
+//			printDeck(table);
+//			System.out.println("Equal Cards on Table");
+//			printDeck(equalCardsOnTable());
+//			System.out.println("Single pair: " + checkPair());
+//			System.out.println("Double pairs: " + checkDoublePair());
+//			System.out.println("Three of a Kind: " + checkThreeOfAKind());
+//			System.out.println("Full House: " + checkFullHouse());
+//			System.out.println("Four of a Kind: " + checkFourOfAKind());
+//			System.out.println("Flush: " + checkFlush());
+//			System.out.println("Straight: " + checkStraight());
+//			System.out.println("Royal Stright: " + checkStraightFlush());
+//			line();
+			
 			count++;
+			System.out.println(count);
+			if(count%10000 == 0) {
+				line();
+				System.out.println(count);
+			}
+			
+			deck.clear();
+			hand.clear();
+			table.clear();
 		}
-		System.out.println("Count: " + count);
+		line();
+		System.out.println("Total Count: " + count);
+		line();
+		System.out.println("Pairs: " + pair);
+		System.out.println("Double Pairs: "+doublePair);
+		System.out.println("Three of a Kind: " + threeOfAKind);
+		System.out.println("Four of a Kind: " + fourOfAKind);
+		System.out.println("Flush: " + flush);
+		System.out.println("Straight : " + straight);
+		System.out.println("Straight Flush: " + straightFlush);
 
 //		deck = newDeck();
 //		hand = newHand(deck);
@@ -386,90 +431,129 @@ public class main {
 		ArrayList<Card> handPlustable = new ArrayList<Card>();
 		handPlustable.addAll(hand);
 		handPlustable.addAll(table);
-
+		
+		Collections.sort(handPlustable, new Comparator<Card>() {
+			public int compare(Card a, Card b) {
+				return a.getValue() - b.getValue();
+			}
+		});
 		boolean straight = false;
 		boolean checkHandCardUse = false;
-		int aux = hand.get(0).getValue();
-//		--
+		Card aux = handPlustable.get(handPlustable.size()-1);
 
-		for (Card card : handPlustable) {
-			if (card.getValue() < aux) {
-				aux = card.getValue();
-			}
-		}
-
-		while (!straight) {
-			straight = true;
-			for (Card card : handPlustable) {
-				if (card.getValue() == aux + 1 || (card.getValue() == 1 && aux + 1 == 15)) {
-					if (card.equals(hand.get(0)) || card.equals(hand.get(1))) {
-						checkHandCardUse = true;
+		boolean includedInicialCard = false;
+		boolean changeInicialCard = false;
+		
+		if(aux.getValue() > 4) {
+			int changeIncialCardIndex = 0;
+			while (!straight) {
+				changeIncialCardIndex++;
+				if(changeInicialCard) {
+					aux = handPlustable.get(handPlustable.size()-changeIncialCardIndex);
+				}
+				changeInicialCard = true;
+				if(changeIncialCardIndex > 2) {
+					straight = true;					
+				}
+				for (Card card : handPlustable) {
+					if (card.getValue() == aux.getValue() - 1 || (card.getValue() == 14 && aux.getValue() == 1)) {
+						if (!includedInicialCard) {
+							straightCount.add(aux);
+							includedInicialCard = true;
+						}
+						straightCount.add(card);
+						aux = card;
+						if (aux.equals(hand.get(0)) || aux.equals(hand.get(1))) {
+							checkHandCardUse = true;
+						}
+						for (int i = 0; i < 2; i++) {
+							if(card.getValue() == hand.get(i).getValue() && !checkHandCardUse) {
+								int index = straightCount.indexOf(card);
+								straightCount.remove(index);
+								straightCount.add(index, hand.get(i));
+								checkHandCardUse = true;
+							}
+						}
+						straight = false;
+						if (straightCount.size() >= 5 && checkHandCardUse) {
+							return true;
+						}
+						changeInicialCard = false;
+						break;
+					}else {
+						changeInicialCard = true;
 					}
-					aux++;
-					straightCount.add(card);
-					straight = false;
-					if (straightCount.size() == 5 && checkHandCardUse) {
-						return true;
-					}
+					
 				}
 			}
 		}
-
+		
 		return false;
 	}
 
-	public static boolean checkRoyalStraight() {
+	public static boolean checkStraightFlush() {
 		ArrayList<Card> straightCount = new ArrayList<Card>();
 		ArrayList<Card> handPlustable = new ArrayList<Card>();
 		handPlustable.addAll(hand);
 		handPlustable.addAll(table);
-
+		
+		Collections.sort(handPlustable, new Comparator<Card>() {
+			public int compare(Card a, Card b) {
+				return a.getValue() - b.getValue();
+			}
+		});
 		boolean straight = false;
 		boolean checkHandCardUse = false;
-		int aux = hand.get(0).getValue();
-//		--
+		Card aux = handPlustable.get(handPlustable.size()-1);
 
-		for (Card card : handPlustable) {
-			if (card.getValue() < aux) {
-				aux = card.getValue();
-			}
-		}
-
-		int count = 0;
+		boolean includedInicialCard = false;
+		boolean changeInicialCard = false;
 		
-		while (!straight) {
-			straight = true;
-			for (Card card : handPlustable) {
-				if (card.getValue() == aux + 1 || (card.getValue() == 1 && aux + 1 == 15)) {
-					if (card.equals(hand.get(0)) || card.equals(hand.get(1))) {
-						checkHandCardUse = true;
+		if(aux.getValue() > 4) {
+			int changeIncialCardIndex = 0;
+			while (!straight) {
+				changeIncialCardIndex++;
+				if(changeInicialCard) {
+					aux = handPlustable.get(handPlustable.size()-changeIncialCardIndex);
+				}
+				changeInicialCard = true;
+				if(changeIncialCardIndex > 2) {
+					straight = true;					
+				}
+				for (Card card : handPlustable) {
+					if ((card.getValue() == aux.getValue() - 1 || (card.getValue() == 14 && aux.getValue() == 1)) && card.getSuit() == aux.getSuit()) {
+						if (!includedInicialCard) {
+							straightCount.add(aux);
+							includedInicialCard = true;
+						}
+						straightCount.add(card);
+						aux = card;
+						if (aux.equals(hand.get(0)) || aux.equals(hand.get(1))) {
+							checkHandCardUse = true;
+						}
+						for (int i = 0; i < 2; i++) {
+							if(card.getValue() == hand.get(i).getValue() && !checkHandCardUse) {
+								int index = straightCount.indexOf(card);
+								straightCount.remove(index);
+								straightCount.add(index, hand.get(i));
+								checkHandCardUse = true;
+							}
+						}
+						straight = false;
+						if (straightCount.size() >= 5 && checkHandCardUse) {
+							return true;
+						}
+						changeInicialCard = false;
+						break;
+					}else {
+						changeInicialCard = true;
 					}
-					aux++;
-					straightCount.add(card);
-					if(count < 2) {
-						straight = false;						
-					}
-					if (straightCount.size() == 5 && checkHandCardUse) {
-						return true;
-					}
+					
 				}
 			}
-			count++;
-			int difference = 0;
-			boolean flag = true;
-			for (Card card2 : handPlustable) {
-				if (flag) {
-					difference = card2.getValue() - aux;
-					flag = false;
-				}
-				if (difference > card2.getValue() - aux) {
-					difference = card2.getValue() - aux;
-				}
-			}
-			aux += difference;
 		}
-
+		
 		return false;
 	}
-
+	
 }

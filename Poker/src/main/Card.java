@@ -1,5 +1,7 @@
 package main;
 
+import java.util.Comparator;
+
 public class Card {
 
 	private String suit;
